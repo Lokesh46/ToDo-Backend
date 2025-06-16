@@ -1,6 +1,7 @@
 package com.in28minutes.rest.webservices.restfulwebservices.todo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,5 +66,20 @@ public class TodoJpaResource {
 		
 //		return createdTodo;
 	}
+	
+	  @PutMapping("/users/{username}/todos/update/{id}")
+	    public ResponseEntity<Todo> markCompleteTodo(@PathVariable String username,
+	                                                 @PathVariable int id) {
+	        Optional<Todo> optionalTodo = todoRepository.findByIdAndUsername(id, username);
 
+	        if (optionalTodo.isEmpty()) {
+	            return ResponseEntity.notFound().build();
+	        }
+
+	        Todo existingTodo = optionalTodo.get();
+	        existingTodo.setDone(true);
+	        todoRepository.save(existingTodo);  // Persist the change
+
+	        return ResponseEntity.ok(existingTodo);
+	    }
 }
