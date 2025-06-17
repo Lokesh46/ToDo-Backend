@@ -14,7 +14,7 @@ public class HelloWorldController {
 
 	@GetMapping(path = "/") // #CHANGE
 	public String returnSomethingAtRootUrl() {
-		return "Congratulations! Update";
+		return "Congratulations! Updated again man";
 	}
 
 	@GetMapping(path = "/hello-world")
