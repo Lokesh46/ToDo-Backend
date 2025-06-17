@@ -9,26 +9,26 @@ public class HelloWorldController {
 
 	@GetMapping(path = "/basicauth")
 	public String basicAuthCheck() {
-		return "Success"; 
+		return "Success";
 	}
 
-	@GetMapping(path = "/") //#CHANGE
+	@GetMapping(path = "/") // #CHANGE
 	public String returnSomethingAtRootUrl() {
-		return "Congratulations!"; 
+		return "Congratulations! Update";
 	}
 
 	@GetMapping(path = "/hello-world")
 	public String helloWorld() {
-		return "Hello World v2"; 
+		return "Hello World v2";
 	}
-	
+
 	@GetMapping(path = "/hello-world-bean")
 	public HelloWorldBean helloWorldBean() {
-		return new HelloWorldBean("Hello World Bean v1"); 
+		return new HelloWorldBean("Hello World Bean v1");
 	}
-	
+
 	@GetMapping(path = "/hello-world/path-variable/{name}")
 	public HelloWorldBean helloWorldPathVariable(@PathVariable String name) {
-		return new HelloWorldBean(String.format("Hello World, %s", name)); 
-	}	
+		return new HelloWorldBean(String.format("Hello World, %s", name));
+	}
 }
