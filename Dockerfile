@@ -8,7 +8,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Build the application (includes clean, test, and package)
-RUN mvn clean install
+RUN mvn clean install -X
 
 # Stage 2: Create a minimal runtime image
 FROM openjdk:17-jdk-slim
