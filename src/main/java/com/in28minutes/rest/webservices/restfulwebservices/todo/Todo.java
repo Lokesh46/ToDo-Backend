@@ -14,13 +14,14 @@ public class Todo {
 		
 	}
 	
-	public Todo(Integer id, String username, String description, LocalDate targetDate, boolean done) {
+	public Todo(Integer id, String username, String description, LocalDate targetDate, boolean done, LocalDate completeDate) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.description = description;
 		this.targetDate = targetDate;
 		this.done = done;
+		this.completeDate = completeDate;
 	}
 
 	@Id
@@ -32,6 +33,7 @@ public class Todo {
 	private String description;
 	private LocalDate targetDate;
 	private boolean done;
+	private LocalDate completeDate;
 
 	public Integer getId() {
 		return id;
@@ -65,7 +67,7 @@ public class Todo {
 		this.targetDate = targetDate;
 	}
 
-	public boolean isDone() {
+	public boolean getDone() {
 		return done;
 	}
 
@@ -77,6 +79,14 @@ public class Todo {
 	public String toString() {
 		return "Todo [id=" + id + ", username=" + username + ", description=" + description + ", targetDate="
 				+ targetDate + ", done=" + done + "]";
+	}
+
+	public LocalDate getCompleteDate() {
+		return completeDate;
+	}
+
+	public void setCompleteDate(LocalDate completeDate) {
+		this.completeDate = completeDate;
 	}
 
 }

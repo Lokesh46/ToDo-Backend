@@ -13,4 +13,7 @@ public interface TodoRepository extends JpaRepository<Todo, Integer>{
 
 	Optional<Todo> findByIdAndUsername(int id, String username);
 
+	List<Todo> findByUsernameAndDone(String username, Boolean done);
+
+
 }
