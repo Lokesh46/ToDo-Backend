@@ -3,7 +3,7 @@ name: Build, Tag, and Deploy Docker Image with Slack Notification
 on:
   push:
     branches: [ master ]
-    tags:     [ '*' ]  # Trigger on any tag push as well
+    tags: [ '*' ]  # Trigger on any tag push as well
 
 jobs:
   build-and-deploy:
@@ -11,6 +11,9 @@ jobs:
 
     env:
       IMAGE_NAME: lokeshimmadi/lokesh-codes
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout Code
@@ -33,7 +36,6 @@ jobs:
           else
             VERSION_TAG=$(date +'%Y-%m-%d')
           fi
-
           echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker Image
@@ -43,7 +45,7 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:render-dep
+            ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version_tag }}
 
       - name: Trigger Deploy on Render
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
