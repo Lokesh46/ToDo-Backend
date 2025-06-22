@@ -3,7 +3,7 @@ name: Build, Tag, and Deploy Docker Image with Slack Notification
 on:
   push:
     branches: [ master ]
-    tags: [ '*' ]  # Trigger on any tag push as well
+    tags: [ '*' ]
 
 jobs:
   build-and-deploy:
@@ -11,9 +11,6 @@ jobs:
 
     env:
       IMAGE_NAME: lokeshimmadi/lokesh-codes
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout Code
@@ -46,6 +43,10 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version_tag }}
+          build-args: |
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
       - name: Trigger Deploy on Render
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}

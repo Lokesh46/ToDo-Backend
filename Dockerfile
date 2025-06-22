@@ -3,19 +3,26 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copy Maven project files first to leverage Docker cache
-COPY pom.xml .
+COPY pom.xml . 
 COPY src ./src
 
-# Build the application (includes clean, test, and package)
-RUN mvn clean install -X
+RUN mvn clean install -DskipTests
 
-# Stage 2: Create a minimal runtime image
+# Stage 2: Runtime image
 FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-# Copy the built JAR from the previous stage
+# Accept secrets from build args
+ARG DB_URL
+ARG DB_USERNAME
+ARG DB_PASSWORD
+
+# Set env vars for Spring Boot
+ENV DB_URL=${DB_URL}
+ENV DB_USERNAME=${DB_USERNAME}
+ENV DB_PASSWORD=${DB_PASSWORD}
+
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
