@@ -43,6 +43,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version_tag }}
+            ${{ env.IMAGE_NAME }}:render-dep
           build-args: |
             DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
