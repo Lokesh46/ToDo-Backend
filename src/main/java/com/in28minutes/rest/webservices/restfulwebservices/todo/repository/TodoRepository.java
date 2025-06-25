@@ -1,19 +1,17 @@
 package com.in28minutes.rest.webservices.restfulwebservices.todo.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.in28minutes.rest.webservices.restfulwebservices.todo.Todo;
+import com.in28minutes.rest.webservices.restfulwebservices.user.User;
 
 public interface TodoRepository extends JpaRepository<Todo, Integer>{
 	
-	List<Todo> findByUsername(String username);
+	List<Todo> findByUserAndDone(User user, Boolean done);
 
-	Optional<Todo> findByIdAndUsername(int id, String username);
-
-	List<Todo> findByUsernameAndDone(String username, Boolean done);
+	List<Todo> findByUser(User user);
 
 
 }

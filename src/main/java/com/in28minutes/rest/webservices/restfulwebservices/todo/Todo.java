@@ -2,10 +2,16 @@ package com.in28minutes.rest.webservices.restfulwebservices.todo;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.in28minutes.rest.webservices.restfulwebservices.user.User;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 
 @Entity
@@ -15,27 +21,47 @@ public class Todo {
 		
 	}
 	
-	public Todo(Integer id, String username, String description, LocalDate targetDate, boolean done, LocalDate completeDate) {
+	
+
+	public Todo(Integer id, String description, LocalDate targetDate, boolean done, LocalDate completeDate, User user) {
 		super();
 		this.id = id;
-		this.username = username;
 		this.description = description;
 		this.targetDate = targetDate;
 		this.done = done;
 		this.completeDate = completeDate;
+		this.user = user;
 	}
+
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	private String username;
 	
 	private String description;
 	private LocalDate targetDate;
 	private boolean done;
 	private LocalDate completeDate;
+	
+    public User getUser() {
+		return user;
+	}
 
+
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+
+
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+	@JsonBackReference
+    private User user;
+    
 	public Integer getId() {
 		return id;
 	}
@@ -44,13 +70,7 @@ public class Todo {
 		this.id = id;
 	}
 
-	public String getUsername() {
-		return username;
-	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
 
 	public String getDescription() {
 		return description;
@@ -76,11 +96,7 @@ public class Todo {
 		this.done = done;
 	}
 
-	@Override
-	public String toString() {
-		return "Todo [id=" + id + ", username=" + username + ", description=" + description + ", targetDate="
-				+ targetDate + ", done=" + done + "]";
-	}
+	
 
 	public LocalDate getCompleteDate() {
 		return completeDate;

@@ -15,87 +15,115 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.in28minutes.rest.webservices.restfulwebservices.todo.repository.TodoRepository;
+import com.in28minutes.rest.webservices.restfulwebservices.todo.repository.UserRepository;
+import com.in28minutes.rest.webservices.restfulwebservices.user.User;
 
 @RestController
 public class TodoJpaResource {
-	
-	private TodoService todoService;
-	
-	private TodoRepository todoRepository;
-	
-	public TodoJpaResource(TodoService todoService, TodoRepository todoRepository) {
-		this.todoService = todoService;
-		this.todoRepository = todoRepository;
-	}
-	
-//	@GetMapping("/users/{username}/todos")
-//	public List<Todo> retrieveTodos(@PathVariable String username) {
-//		//return todoService.findByUsername(username);
-//		return todoRepository.findByUsername(username);
-//	}
-	
-	@GetMapping("/users/{username}/todos")
-	public List<Todo> retrieveTodos(
-	        @PathVariable String username,
-	        @RequestParam(required = false) Boolean done) {
 
-	    if (done != null) {
-	        return todoRepository.findByUsernameAndDone(username, done);
-	    } else {
-	        return todoRepository.findByUsername(username);
-	    }
-	}
-	
+    private final TodoRepository todoRepository;
+    private final UserRepository userRepository;
 
-	@GetMapping("/users/{username}/todos/{id}")
-	public Todo retrieveTodo(@PathVariable String username,
-			@PathVariable int id) {
-		//return todoService.findById(id);
-		return todoRepository.findById(id).get();
-	}
+    public TodoJpaResource(TodoRepository todoRepository, UserRepository userRepository) {
+        this.todoRepository = todoRepository;
+        this.userRepository = userRepository;
+    }
 
-	@DeleteMapping("/users/{username}/todos/{id}")
-	public ResponseEntity<Void> deleteTodo(@PathVariable String username,
-			@PathVariable int id) {
-		//todoService.deleteById(id);
-		todoRepository.deleteById(id);
-		return ResponseEntity.noContent().build();
-	}
+    @GetMapping("/users/{username}/todos")
+    public ResponseEntity<List<Todo>> retrieveTodos(
+            @PathVariable String username,
+            @RequestParam(required = false) Boolean done) {
 
-	@PutMapping("/users/{username}/todos/{id}")
-	public Todo updateTodo(@PathVariable String username,
-			@PathVariable int id, @RequestBody Todo todo) {
-		//todoService.updateTodo(todo);
-		todoRepository.save(todo);
-		return todo;
-	}
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-	@PostMapping("/users/{username}/todos")
-	public Todo createTodo(@PathVariable String username,
-			 @RequestBody Todo todo) {
-		todo.setUsername(username);
-		todo.setId(null);
-		return todoRepository.save(todo);
-//		Todo createdTodo = todoService.addTodo(username, todo.getDescription(), 
-//				todo.getTargetDate(),todo.isDone() );
-		
-//		return createdTodo;
-	}
-	
-	  @PutMapping("/users/{username}/todos/update/{id}")
-	    public ResponseEntity<Todo> markCompleteTodo(@PathVariable String username,
-	                                                 @PathVariable int id) {
-	        Optional<Todo> optionalTodo = todoRepository.findByIdAndUsername(id, username);
+        User user = userOptional.get();
 
-	        if (optionalTodo.isEmpty()) {
-	            return ResponseEntity.notFound().build();
-	        }
+        List<Todo> todos;
+        if (done != null) {
+            todos = todoRepository.findByUserAndDone(user, done);
+        } else {
+            todos = todoRepository.findByUser(user);
+        }
 
-	        Todo existingTodo = optionalTodo.get();
-	        existingTodo.setDone(true);
-	        existingTodo.setCompleteDate(LocalDate.now());
-	        todoRepository.save(existingTodo);  // Persist the change
+        return ResponseEntity.ok(todos);
+    }
 
-	        return ResponseEntity.ok(existingTodo);
-	    }
+    @GetMapping("/users/{username}/todos/{id}")
+    public ResponseEntity<Todo> retrieveTodo(@PathVariable String username,
+                                             @PathVariable int id) {
+
+        Optional<Todo> optionalTodo = todoRepository.findById(id);
+        if (optionalTodo.isEmpty() || !optionalTodo.get().getUser().getUsername().equals(username)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(optionalTodo.get());
+    }
+
+    @DeleteMapping("/users/{username}/todos/{id}")
+    public ResponseEntity<Void> deleteTodo(@PathVariable String username,
+                                           @PathVariable int id) {
+        Optional<Todo> optionalTodo = todoRepository.findById(id);
+
+        if (optionalTodo.isEmpty() || !optionalTodo.get().getUser().getUsername().equals(username)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        todoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/users/{username}/todos/{id}")
+    public ResponseEntity<Todo> updateTodo(@PathVariable String username,
+                                           @PathVariable int id,
+                                           @RequestBody Todo todo) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        todo.setId(id);
+        todo.setUser(userOptional.get());
+        return ResponseEntity.ok(todoRepository.save(todo));
+    }
+
+    @PostMapping("/users/{username}/todos")
+    public ResponseEntity<Todo> createTodo(@PathVariable String username,
+                                           @RequestBody Todo todo) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        todo.setId(null);
+        todo.setUser(userOptional.get());
+        todo.setCompleteDate(null); // Ensure completeDate is null on creation
+        return ResponseEntity.ok(todoRepository.save(todo));
+    }
+
+    @PutMapping("/users/{username}/todos/update/{id}")
+    public ResponseEntity<Todo> markCompleteTodo(@PathVariable String username,
+                                                 @PathVariable int id) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<Todo> optionalTodo = todoRepository.findById(id);
+        if (optionalTodo.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Todo existingTodo = optionalTodo.get();
+        if (!existingTodo.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+
+        existingTodo.setDone(true);
+        existingTodo.setCompleteDate(LocalDate.now());
+        return ResponseEntity.ok(todoRepository.save(existingTodo));
+    }
 }

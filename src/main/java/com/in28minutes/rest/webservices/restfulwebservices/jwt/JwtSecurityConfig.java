@@ -19,8 +19,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -28,7 +26,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.JOSEException;
@@ -53,7 +50,7 @@ public class JwtSecurityConfig {
                 .authorizeHttpRequests(
                         auth -> 
                             auth.requestMatchers("/", //#CHANGE
-                            		"/authenticate", "/actuator", "/actuator/*")
+                            		"/authenticate", "/actuator", "/actuator/*","/register")
                                 .permitAll()
                                 .requestMatchers("/h2-console/**")
                                 .permitAll()
@@ -82,16 +79,16 @@ public class JwtSecurityConfig {
         return new ProviderManager(authenticationProvider);
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("test")
-                                .password("{noop}test")
-                                .authorities("read")
-                                .roles("USER")
-                                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        UserDetails user = User.withUsername("test")
+//                                .password("{noop}test")
+//                                .authorities("read")
+//                                .roles("USER")
+//                                .build();
+//
+//        return new InMemoryUserDetailsManager(user);
+//    }
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
